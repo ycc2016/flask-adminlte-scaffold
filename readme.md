@@ -1,4 +1,20 @@
 # flask-adminlte-handler
+
+
+## 修改说明
+感谢原作者的辛勤付出！
+但在试用之后，发现有3个问题：
+1、python models建表时报错：no modules app,原因是目录不对，把models.py移到上一层目录(app）下可解决；
+
+2、当增加数据成功后，list会报错，app的utils.py文件里76行obj_to_dict函数有问题，需要修改；
+
+3、当右边的页面切换时，左边菜单总是第一个为激活状态；
+
+fork的目的，就是做一个修复以上问题，下载即用的脚手架；
+
+后续可能做python2.7以及PG数据库的兼容；
+
+
 ## 简介
 flask-adminlte-handler是一个Python环境下的WEB后台管理系统脚手架，目标是用极少量的代码，快速构建小型WEB应用。请勿在大中型项目中进行尝试。  
 
@@ -6,6 +22,7 @@ flask-adminlte-handler是一个Python环境下的WEB后台管理系统脚手架�
 2. Web框架使用Flask，默认Jinja模版
 3. ORM框架使用Peewee
 4. 前端套用基于BootStrap的AdminLTE模板
+
 
 ## 系统截图
 - 登录页  
