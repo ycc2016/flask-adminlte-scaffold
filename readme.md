@@ -4,6 +4,7 @@
 ## 修改说明
 感谢原作者的辛勤付出！
 但在试用之后，发现有3个问题：
+
 1、python models建表时报错：no modules app,原因是目录不对，把models.py移到上一层目录(app）下可解决；
 
 2、当增加数据成功后，list会报错，app的utils.py文件里76行obj_to_dict函数有问题，需要修改；
