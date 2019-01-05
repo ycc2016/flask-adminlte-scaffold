@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from peewee import MySQLDatabase, Model, CharField, BooleanField, IntegerField
+from peewee import  Model, CharField, BooleanField, IntegerField,PostgresqlDatabase
 import json
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import UserMixin
 from app import login_manager
 from conf.config import config
@@ -10,7 +10,8 @@ import os
 
 cfg = config[os.getenv('FLASK_CONFIG') or 'default']
 
-db = MySQLDatabase(host=cfg.DB_HOST, user=cfg.DB_USER, passwd=cfg.DB_PASSWD, database=cfg.DB_DATABASE)
+#db = MySQLDatabase(host=cfg.DB_HOST, user=cfg.DB_USER, passwd=cfg.DB_PASSWD, database=cfg.DB_DATABASE)
+db=PostgresqlDatabase(database=cfg.DB_DATABASE,user=cfg.DB_USER,password=cfg.DB_PASSWD,host=cfg.DB_HOST)
 
 
 class BaseModel(Model):
@@ -49,6 +50,18 @@ class CfgNotify(BaseModel):
     notify_number = CharField()  # 通知号码
     status = BooleanField(default=True)  # 生效失效标识
 
+# 菜单配置
+class app_menu(BaseModel):
+    menu_label = CharField()  # 菜单标题
+    menu_list_url = CharField()  # list_url
+    menu_edit_url = CharField()  # edit_url
+    menu_desc = CharField()  # 菜单说明
+    enable_flag = BooleanField(default=True)  # 生效失效标识
+
+# 用户菜单配置
+class user_menu(BaseModel):
+    user_id = IntegerField()  # 用户ID
+    menu_id = IntegerField()  # 菜单ID
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -58,7 +71,7 @@ def load_user(user_id):
 # 建表
 def create_table():
     db.connect()
-    db.create_tables([CfgNotify, User])
+    db.create_tables([CfgNotify, User,app_menu,user_menu])
 
 
 if __name__ == '__main__':
