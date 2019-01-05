@@ -49,6 +49,26 @@ def dict_to_obj(dict, obj, exclude=None):
         setattr(obj, key, dict[key])
     return obj
 
+# 将class转dict,以_开头的属性不要
+def props(obj):
+    pr = {}
+    for name in dir(obj):
+        value = getattr(obj, name)
+        if not name.startswith('__') and not callable(value) and not name.startswith('_'):
+            pr[name] = value
+    return pr
+# 将class转dict,以_开头的也要
+def props_with_(obj):
+    pr = {}
+    for name in dir(obj):
+        value = getattr(obj, name)
+        if not name.startswith('__') and not callable(value):
+            pr[name] = value
+    return pr
+# dict转obj，先初始化一个obj
+def dict2obj(obj,dict):
+    obj.__dict__.update(dict)
+    return obj
 
 # peewee转dict
 def obj_to_dict(obj, exclude=None):
@@ -63,7 +83,8 @@ def obj_to_dict(obj, exclude=None):
 def query_to_list(query, exclude=None):
     list = []
     for obj in query:
-        dict = obj_to_dict(obj, exclude)
+        #dict = obj_to_dict(obj, exclude)
+        dict=props(obj)
         list.append(dict)
     return list
 
@@ -102,7 +123,8 @@ def form_to_model(form, model):
 
 # peewee模型转表单
 def model_to_form(model, form):
-    dict = obj_to_dict(model)
+    #dict = obj_to_dict(model)
+    dict=props(model)
     form_key_list = [k for k in form.__dict__]
     for k, v in dict.items():
         if k in form_key_list and v:
