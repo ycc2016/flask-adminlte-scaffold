@@ -2,9 +2,10 @@ from app import get_logger, get_config
 import math
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
+from werkzeug.security import generate_password_hash
 from app import utils
-from app.models import CfgNotify
-from app.main.forms import CfgNotifyForm
+from app.models import CfgNotify,User,app_menu,user_menu
+from app.main.forms import CfgNotifyForm,userForm,menuForm,usermenuForm
 from . import main
 
 logger = get_logger(__name__)
@@ -29,12 +30,14 @@ def common_list(DynamicModel, view):
     # 查询列表
     query = DynamicModel.select()
     total_count = query.count()
+    print(total_count)
 
     # 处理分页
     if page: query = query.paginate(page, length)
 
     dict = {'content': utils.query_to_list(query), 'total_count': total_count,
             'total_page': math.ceil(total_count / length), 'page': page, 'length': length}
+    #print(dict)
     return render_template(view, form=dict, current_user=current_user)
 
 
@@ -59,6 +62,35 @@ def common_edit(DynamicModel, form, view):
         if form.validate_on_submit():
             model = DynamicModel()
             utils.form_to_model(form, model)
+            model.save()
+            flash('保存成功')
+        else:
+            utils.flash_errors(form)
+    return render_template(view, form=form, current_user=current_user)
+
+# 通用单模型查询&新增&修改
+def user_edit(DynamicModel, form, view):
+    id = request.args.get('id', '')
+    if id:
+        # 查询
+        model = DynamicModel.get(DynamicModel.id == id)
+        if request.method == 'GET':
+            utils.model_to_form(model, form)
+        # 修改
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                utils.form_to_model(form, model)
+                model.password=generate_password_hash(form.password.data)
+                model.save()
+                flash('修改成功')
+            else:
+                utils.flash_errors(form)
+    else:
+        # 新增
+        if form.validate_on_submit():
+            model = DynamicModel()
+            utils.form_to_model(form, model)
+            model.password=generate_password_hash(form.password.data)
             model.save()
             flash('保存成功')
         else:
@@ -92,3 +124,46 @@ def notifylist():
 @login_required
 def notifyedit():
     return common_edit(CfgNotify, CfgNotifyForm(), 'notifyedit.html')
+
+
+# 用户查询
+@main.route('/userlist', methods=['GET', 'POST'])
+@login_required
+def userlist():
+    return common_list(User, 'userlist.html')
+
+
+# 用户配置
+@main.route('/useredit', methods=['GET', 'POST'])
+@login_required
+def useredit():
+    return user_edit(User, userForm(), 'useredit.html')
+
+
+# 菜单查询
+@main.route('/menulist', methods=['GET', 'POST'])
+@login_required
+def menulist():
+    return common_list(app_menu, 'menulist.html')
+
+
+# 菜单配置
+@main.route('/menuedit', methods=['GET', 'POST'])
+@login_required
+def menuedit():
+    return common_edit(app_menu, menuForm(), 'menuedit.html')
+
+# 用户菜单查询
+@main.route('/usermenulist', methods=['GET', 'POST'])
+@login_required
+def usermenulist():
+    return common_list(user_menu, 'usermenulist.html')
+
+
+# 用户菜单配置
+@main.route('/usermenuedit', methods=['GET', 'POST'])
+@login_required
+def usermenuedit():
+    return common_edit(user_menu, usermenuForm(), 'usermenuedit.html')
+
+
